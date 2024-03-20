@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GST Bill Generating System</title>
+    <style>
+        /* Add your CSS styles here */
+        body {
+            background: linear-gradient(to bottom, rgba(3, 51, 244, 0.151), rgba(3, 51, 244, 0.129)) center fixed, url(3.jpg) left fixed;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: white;
+        }
+
+        header {
+            background-color: #333333;
+            color: #fff;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        main {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h2 {
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        form label,
+        form input,
+        form textarea {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        form button {
+            background-color: rgb(128, 128, 195);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: rgba(81, 81, 197, 0.611);
+        }
+
+        #item-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #item-list li {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .remove-item {
+            background-color: #000080; /* Dark blue color */
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .remove-item:hover {
+            background-color: #0000FF; /* Light blue color on hover */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>GST Bill Generating System</h1>
+    </header>
+    <main>
+        <section id="bill-form">
+            <h2>Generate a GST Bill</h2>
+            <form id="bill-generator">
+                <label for="company-name">Company Name:</label>
+                <input type="text" id="company-name" name="company-name" required>
+
+                <label for="customer-name">Customer Name:</label>
+                <input type="text" id "customer-name" name="customer-name" required>
+
+                <label for="billing-address">Billing Address:</label>
+                <textarea id="billing-address" name="billing-address" rows="4" required></textarea>
+
+                <label for="pin-code">PIN Code:</label>
+                <input type="text" id="pin-code" name="pin-code" required>
+
+                <label for="item-select">Select an Item:</label>
+                <select id="item-select">
+                    <option value="">Select an item</option>
+                    <option value="Ac">Ac</option>
+                    <option value="Printer">Printer</option>
+                    <option value="Phones">Phones</option>
+                    <option value="Desktop monitor (upto 32 inches)">Desktop monitor (upto 32 inches)</option>
+                    <option value="Desktop monitor (more than 32 inches)">Desktop monitor (more than 32 inches)</option>
+                    <option value="Laptop adaptor">Laptop adaptor</option>
+                    <option value="Keyboard">Keyboard</option>
+                    <option value="Mouse">Mouse</option>
+                    <option value="CCTV">CCTV</option>
+                </select>
+                <p id="item-price-display"></p>
+
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" required>
+
+                <label for="tax-rate">Tax Rate (%):</label>
+                <input type="number" id="tax-rate" name="tax-rate" step="0.01" value="18" required>
+
+                <button type="button" id="add-item">Add Item</button>
+
+                <h3>Items:</h3>
+                <ul id="item-list">
+                    <!-- Item list will be populated dynamically -->
+                </ul>
+
+                <p>Subtotal: <span id="subtotal">0.00</span></p>
+                <p>Tax Amount: <span id="tax-amount">0.00</span></p>
+                <p>Total Amount: <span id="total-amount">0.00</span></p>
+
+                <button type="submit" id="generate-bill">Generate GST Bill</button>
+            </form>
+        </section>
+    </main>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const billForm = document.getElementById("bill-generator");
+            const itemList = document.getElementById("item-list");
+            const subtotalSpan = document.getElementById("subtotal");
+            const taxAmountSpan = document.getElementById("tax-amount");
+            const totalAmountSpan = document.getElementById("total-amount");
+
+            let items = [];
+
+            const itemPrices = {
+                Ac: 55990,
+                Printer: 7992,
+                Phones: 14999,
+                'Desktop monitor (upto 32 inches)': 19899,
+                'Desktop monitor (more than 32 inches)': 41990,
+                'Laptop adaptor': 4499,
+                Keyboard: 824,
+                Mouse: 549,
+                CCTV: 4780
+            };
+
+            const itemSelect = document.getElementById("item-select");
+            const itemPriceDisplay = document.getElementById("item-price-display");
+
+            itemSelect.addEventListener("change", function () {
+                const selectedItem = itemSelect.value;
+                if (selectedItem) {
+                    const itemPrice = itemPrices[selectedItem];
+                    itemPriceDisplay.textContent = `Price: ₹${itemPrice.toFixed(2)}`;
+                } else {
+                    itemPriceDisplay.textContent = "";
+                }
+            });
+
+            billForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                const taxRate = parseFloat(document.getElementById("tax-rate").value);
+
+                // Calculate the subtotal
+                const subtotal = items.reduce((total, item) => total + parseFloat(item.amount), 0).toFixed(2);
+
+                // Calculate the tax amount (18% of the subtotal)
+                const taxAmount = (subtotal * (taxRate / 100)).toFixed(2);
+
+                // Calculate the total amount (subtotal + tax amount)
+                const total = (parseFloat(subtotal) + parseFloat(taxAmount)).toFixed(2);
+
+                // Display subtotal, tax amount, and total amount
+                subtotalSpan.textContent = `Subtotal: ₹${subtotal}`;
+                taxAmountSpan.textContent = `Tax Amount: ₹${taxAmount}`;
+                totalAmountSpan.textContent = `Total Amount: ₹${total}`;
+            });
+
+            document.getElementById("add-item").addEventListener("click", function () {
+                const selectedItem = itemSelect.value;
+                const itemPrice = itemPrices[selectedItem];
+
+                // Add the item to the items array and update the item list and total amount
+                const quantity = parseInt(document.getElementById("quantity").value);
+
+                if (selectedItem && itemPrice && quantity) {
+                    const amount = (itemPrice * quantity).toFixed(2);
+                    items.push({ itemName: selectedItem, itemPrice, quantity, amount });
+
+                    // Update the item list and total amount
+                    updateItemList();
+                }
+            });
+
+            // Add an event listener to handle item removal
+            itemList.addEventListener("click", function (e) {
+                if (e.target.classList.contains("remove-item")) {
+                    // Get the index of the item to be removed
+                    const index = parseInt(e.target.getAttribute("data-index"));
+
+                    // Remove the item from the items array
+                    items.splice(index, 1);
+
+                    // Update the item list and total amount
+                    updateItemList();
+                }
+            });
+
+            function updateItemList() {
+                const itemList = document.getElementById("item-list");
+                itemList.innerHTML = '';
+
+                items.forEach((item, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        ${item.itemName} - ₹${item.itemPrice.toFixed(2)} x ${item.quantity} = ₹${item.amount}
+                        <button class="remove-item" data-index="${index}">Remove</button>
+                    `;
+                    itemList.appendChild(listItem);
+                });
+
+                const subtotal = items.reduce((total, item) => total + parseFloat(item.amount), 0).toFixed(2);
+                subtotalSpan.textContent = `Subtotal: ₹${subtotal}`;
+
+                const taxRate = parseFloat(document.getElementById("tax-rate").value);
+                // Calculate the tax amount (18% of the subtotal)
+                const taxAmount = (subtotal * (taxRate / 100)).toFixed(2);
+                taxAmountSpan.textContent = `Tax Amount: ₹${taxAmount}`;
+
+                // Calculate the total amount (subtotal + tax amount)
+                const total = (parseFloat(subtotal) + parseFloat(taxAmount)).toFixed(2);
+                totalAmountSpan.textContent = `Total Amount: ₹${total}`;
+            }
+        });
+    </script>
+</body>
+</html>

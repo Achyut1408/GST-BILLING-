@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Details</title>
+    <style>
+        /* Add your CSS styles here */
+        body {
+            background: linear-gradient(to bottom, rgba(123, 146, 241, 0.151), rgba(62, 76, 133, 0.129)) center fixed, url(bill.jpeg) ;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 500%;
+            color: white;
+        }
+
+        header {
+            background-color: rgba(143, 143, 238, 0.393);
+            color: #fff;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h2 {
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .bill-details {
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+
+        .bill-details h3 {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        .bill-details table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .bill-details th, .bill-details td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bill</h1>
+    </header>
+    <main>
+        <section class="bill-details">
+            <h2>Bill Summary</h2>
+            <div id="bill-summary">
+                <!-- JavaScript will populate the bill summary here -->
+            </div>
+        </section>
+    </main>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const billSummary = document.getElementById("bill-summary");
+
+            // Retrieve bill details from local storage
+            const billDetailsData = JSON.parse(localStorage.getItem("billDetails"));
+
+            if (billDetailsData) {
+                const companyName = billDetailsData.companyName;
+                const customerName = billDetailsData.customerName;
+                const billingAddress = billDetailsData.billingAddress;
+                const pinCode = billDetailsData.pinCode;
+                const subtotal = parseFloat(billDetailsData.subtotal);
+                const taxRate = parseFloat(billDetailsData.taxRate);
+                const taxAmount = parseFloat(billDetailsData.taxAmount);
+                const total = parseFloat(billDetailsData.total);
+                const items = billDetailsData.items;
+
+                // Generate the bill summary HTML as a table
+                const billSummaryHTML = `
+                    <table>
+                        <tr>
+                            <th>Field</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td>Company Name</td>
+                            <td>${companyName}</td>
+                        </tr>
+                        <tr>
+                            <td>Customer Name</td>
+                            <td>${customerName}</td>
+                        </tr>
+                        <tr>
+                            <td>Billing Address</td>
+                            <td>${billingAddress}</td>
+                        </tr>
+                        <tr>
+                            <td>Pin Code</td>
+                            <td>${pinCode}</td>
+                        </tr>
+                        <tr>
+                            <td>Items</td>
+                            <td>
+                                <ul>
+                                    ${items.map((item) => `
+                                        <li>${item.itemName} - $${item.itemPrice.toFixed(2)} x ${item.quantity} = $${item.amount}</li>
+                                    `).join('')}
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Subtotal</td>
+                            <td>$${subtotal.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td>Tax Rate</td>
+                            <td>${taxRate}%</td>
+                        </tr>
+                        <tr>
+                            <td>Tax Amount</td>
+                            <td>$${taxAmount.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td>Total Amount</td>
+                            <td>$${total.toFixed(2)}</td>
+                        </tr>
+                    </table>
+                `;
+
+                // Insert the bill summary table into the page
+                billSummary.innerHTML = billSummaryHTML;
+            } else {
+                // Handle the case where there are no bill details available
+                billSummary.innerHTML = "<p>No bill details found.</p>";
+            }
+
+            // Clear the bill details from local storage
+            localStorage.removeItem("billDetails");
+        });
+    </script>
+</body>
+</html>
